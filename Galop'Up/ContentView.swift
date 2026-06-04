@@ -8,21 +8,41 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var authService = AuthService()
+    var googleFunction = GoogleFunctions()
     var body: some View {
         ZStack{
             Color.orangeBackground
                 .ignoresSafeArea()
-            
-            VStack {
-                Button(action:{
-                    
-                }, label: {
-                    ConnectionLogoButtonView(logo: .google)
-                })
+        
+            if authService.isAuthenticated {
+                if authService.currentUser?.level == nil{
+                    OnBoardingView()
+                }
+                else{
+                    VStack {
+                        Button(action:{
+                            authService.fetchUser()
+                        }, label: {
+                            Text("fetch")
+                        })
+                        
+                        Button(action:{
+                            authService.logout()
+                        }, label: {
+                            Text("logout")
+                        })
+                        
+                    }
+                    .padding()
+                }
                 
             }
-            .padding()
+            else{
+                authentificationView()
+            }
         }
+        .environment(authService)
         
     }
 }
