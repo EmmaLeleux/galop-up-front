@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B595B63C2F85046100C6F598 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B595B63B2F85046100C6F598 /* GoogleSignIn */; };
+		B595B63E2F85046100C6F598 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B595B63D2F85046100C6F598 /* GoogleSignInSwift */; };
+		B595B8D02FBDF2C100C6F598 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = B595B8CF2FBDF2C100C6F598 /* KeychainAccess */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		B595B5632F84F4AE00C6F598 /* Galop'Up.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Galop'Up.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B595B63C2F85046100C6F598 /* GoogleSignIn in Frameworks */,
+				B595B63E2F85046100C6F598 /* GoogleSignInSwift in Frameworks */,
+				B595B8D02FBDF2C100C6F598 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +74,9 @@
 			);
 			name = "Galop'Up";
 			packageProductDependencies = (
+				B595B63B2F85046100C6F598 /* GoogleSignIn */,
+				B595B63D2F85046100C6F598 /* GoogleSignInSwift */,
+				B595B8CF2FBDF2C100C6F598 /* KeychainAccess */,
 			);
 			productName = "Galop'Up";
 			productReference = B595B5632F84F4AE00C6F598 /* Galop'Up.app */;
@@ -94,6 +106,10 @@
 			);
 			mainGroup = B595B55A2F84F4AE00C6F598;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B595B63A2F85046100C6F598 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				B595B8CE2FBDF2C100C6F598 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B595B5642F84F4AE00C6F598 /* Products */;
 			projectDirPath = "";
@@ -256,6 +272,7 @@
 				DEVELOPMENT_TEAM = 2C5M8KW24K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Galop-Up-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -269,12 +286,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "emma.Galop-Up";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -288,6 +309,7 @@
 				DEVELOPMENT_TEAM = 2C5M8KW24K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Galop-Up-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -301,12 +323,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "emma.Galop-Up";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -332,6 +358,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B595B63A2F85046100C6F598 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+		B595B8CE2FBDF2C100C6F598 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B595B63B2F85046100C6F598 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B595B63A2F85046100C6F598 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		B595B63D2F85046100C6F598 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B595B63A2F85046100C6F598 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		B595B8CF2FBDF2C100C6F598 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B595B8CE2FBDF2C100C6F598 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B595B55B2F84F4AE00C6F598 /* Project object */;
 }

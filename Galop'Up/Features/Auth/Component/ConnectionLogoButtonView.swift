@@ -9,17 +9,18 @@ import SwiftUI
 
 struct ConnectionLogoButtonView: View {
     var logo: ImageResource
+    
     var body: some View {
         Image(logo)
             .resizable()
             .scaledToFit()
-            .padding(15)
+            .padding(8)
             .overlay(
                 
                 RoundedRectangle(cornerRadius: 15)
-                    .stroke(lineWidth: 2).foregroundStyle(.darkBrown)
+                    .stroke(lineWidth: 1).foregroundStyle(.darkBrown)
             )
-            .frame(width: 100)
+            .frame(width: 60)
         
         
     }
