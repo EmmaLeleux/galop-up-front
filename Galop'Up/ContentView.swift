@@ -22,7 +22,10 @@ struct ContentView: View {
                 else{
                     VStack {
                         Button(action:{
-                            authService.fetchUser()
+                            Task{
+                               try await authService.fetchUser()
+                            }
+                            
                         }, label: {
                             Text("fetch")
                         })

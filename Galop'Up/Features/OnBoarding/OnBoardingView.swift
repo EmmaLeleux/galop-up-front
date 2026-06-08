@@ -10,17 +10,30 @@ import SwiftUI
 struct OnBoardingView: View {
     @Environment(AuthService.self) var authService
     @State var onBoardingVM = OnBoardingViewModel()
+    @State var userService: UserService = UserService()
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing:0){
                 ForEach(onBoardingVM.pages) { page in
                     switch page {
-                    case .page1: OnBoardingPage1(onComplete: onBoardingVM.goToPage2)
+                    case .pageUsername: OnBoardingUsername(onComplete: onBoardingVM.goToPageProfilPicture)
+                            .padding(.horizontal)
                             .containerRelativeFrame([.horizontal])
-                    case .page2: OnBoardingPage2(onComplete: authService.fetchUser)
+                        
+                    case .pageProfilPicture: OnBoardingProfilPicture(onComplete: onBoardingVM.goToPageLevel )
+                            .padding(.horizontal)
+                            .containerRelativeFrame([.horizontal])
+                        
+                    case .pageLevel: OnBoardingLevelView(onComplete: {
+                        Task{
+                            authService.fetchUser
+                        }
+                    } )
+                            .padding(.horizontal)
                             .containerRelativeFrame([.horizontal])
                     }
                 }
+                
             }
             .scrollTargetLayout()
         }
@@ -28,9 +41,13 @@ struct OnBoardingView: View {
         .scrollTargetBehavior(.viewAligned)
         .scrollIndicators(.hidden)
         .scrollDisabled(true)
+        .environment(userService)
         .onAppear {
+        
+                onBoardingVM.position.scrollTo(id: OnBoardingPageEnum.first.id)
+                userService.setAuthService(authService)
             
-            onBoardingVM.position.scrollTo(id: OnBoardingPageEnum.first.id)
+            
             
         }
     }

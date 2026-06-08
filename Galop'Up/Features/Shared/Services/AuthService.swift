@@ -73,20 +73,15 @@ class AuthService {
         }
     }
     
-    func fetchUser() {
+    
+    func fetchUser() async throws {
         guard let url = URL(string: "http://localhost:8080/user/me") else {
             print("Wrong URL")
             return
         }
         if expirationDate == nil || Date() > expirationDate! {
            
-            refreshAccessToken { success in
-                        guard success else { return }
-                        self.fetchUser()
-                    }
-            
-                    return
-            
+            try await refreshAccessToken()
             
         }
         var request = URLRequest(url: url)
@@ -117,7 +112,7 @@ class AuthService {
         .resume()
     }
     
-    func register(email: String, password: String, confirmPassword: String) {
+    func register(email: String, password: String, confirmPassword: String) async throws {
         guard let url = URL(string: "http://localhost:8080/auth/register") else {
             print("Wrong URL")
             return
@@ -158,40 +153,26 @@ class AuthService {
             return
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.fetchUser()
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                    }
-                } catch{
-                    DispatchQueue.main.async {
-                        if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                            self.errorMessage = errorResponse.localizedMessage
-                        } else {
-                            self.errorMessage = "Une erreur est survenue. Merci de réessayer"
-                        }
-                    }
+        let (data, _) = try await URLSession.shared.data(for: request)
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+                let decoded = try decoder.decode(LoginResponse.self, from: data)
+                await MainActor.run {
+                    self.accessToken = decoded.accessToken
+                    self.refreshToken = decoded.refreshToken
+                    self.expirationDate = decoded.accessTokenExpiration
+                    
+                    self.errorMessage = nil
+                    
+                    UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
+                    NotificationCenter.default.post(name: .didLogin, object: nil)
                 }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Network error: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
+        try await self.fetchUser()
     }
     
-    func login(email: String, password: String) {
+    func login(email: String, password: String) async throws {
         guard let url = URL(string: "http://localhost:8080/auth/login") else {
             print("Wrong URL")
             return
@@ -217,37 +198,27 @@ class AuthService {
             return
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.fetchUser()
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.errorMessage = "identifiant ou mot de passe incorrect"
-                    }
+        let (data, _) = try await URLSession.shared.data(for: request)
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+                let decoded = try decoder.decode(LoginResponse.self, from: data)
+                await MainActor.run {
+                    self.accessToken = decoded.accessToken
+                    self.refreshToken = decoded.refreshToken
+                    self.expirationDate = decoded.accessTokenExpiration
+                    
+                    self.errorMessage = nil
+                    
+                    UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
+                    NotificationCenter.default.post(name: .didLogin, object: nil)
                 }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Network error: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
+        try await self.fetchUser()
     }
     
     
-    func loginWithGoogle(googleToken: String){
+    func loginWithGoogle(googleToken: String) async throws{
         guard let url = URL(string: "http://localhost:8080/auth/google") else {
             print("Wrong URL")
             return
@@ -266,33 +237,23 @@ class AuthService {
             return
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.fetchUser()
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.errorMessage = "impossible de se connecter avec ce compte. Veuillez réessayer"
-                    }
+        let (data, _) = try await URLSession.shared.data(for: request)
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+                let decoded = try decoder.decode(LoginResponse.self, from: data)
+                await MainActor.run {
+                    self.accessToken = decoded.accessToken
+                    self.refreshToken = decoded.refreshToken
+                    self.expirationDate = decoded.accessTokenExpiration
+                    
+                    self.errorMessage = nil
+                    
+                    UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
+                    NotificationCenter.default.post(name: .didLogin, object: nil)
                 }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "network error: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
+        try await self.fetchUser()
         
     }
     
@@ -338,7 +299,8 @@ class AuthService {
             }.resume()
     }
     
-    func refreshAccessToken(completion: @escaping (Bool) -> Void){
+    func refreshAccessToken() async throws{
+        //TODO: la déconnection via ça est super lente
         guard let url = URL(string: "http://localhost:8080/auth/refresh-token") else {
             print("Wrong URL")
             return
@@ -364,40 +326,30 @@ class AuthService {
             print("Error encodage body: \(error)")
             return
         }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                        completion(true)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.accessToken = nil
-                        self.refreshToken = nil
-                        self.currentUser = nil
-                        self.expirationDate = nil
-                        self.errorMessage = "vous avez été déconnecté, veuillez vous reconnecter"
-                        completion(false)
-                    }
+        let (data, _) = try await URLSession.shared.data(for: request)
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+            do {
+                let decoded = try decoder.decode(LoginResponse.self, from: data)
+                await MainActor.run {
+                    self.accessToken = decoded.accessToken
+                    self.refreshToken = decoded.refreshToken
+                    self.expirationDate = decoded.accessTokenExpiration
+                    self.errorMessage = nil
+                    UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
                 }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Network error: \(error.localizedDescription)"
-                    completion(false)
+            } catch {
+                await MainActor.run {
+                    self.accessToken = nil
+                    self.refreshToken = nil
+                    self.currentUser = nil
+                    self.expirationDate = nil
+                    self.errorMessage = "Vous avez été déconnecté, veuillez vous reconnecter"
                 }
+                throw error
             }
-        }.resume()
     }
 }
 

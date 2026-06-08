@@ -29,7 +29,9 @@ struct GoogleFunctions{
                 print("Error signing in: \(error?.localizedDescription ?? "No error description")")
                 return
             }
-            authService.loginWithGoogle(googleToken: result.user.idToken?.tokenString ?? "")
+            Task{
+                try await authService.loginWithGoogle(googleToken: result.user.idToken?.tokenString ?? "")
+            }
         }
     }
 }

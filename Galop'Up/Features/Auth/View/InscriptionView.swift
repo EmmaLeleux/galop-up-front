@@ -23,11 +23,14 @@ struct InscriptionView: View {
             
         
         Button(action:{
-            authService.register(email: email, password: password, confirmPassword: confirmPassword)
+            Task{
+                try await authService.register(email: email, password: password, confirmPassword: confirmPassword)
+
+            }
         }, label: {
             
             Text("S'inscrire")
-                .orangeButton()
+                .CustomButton()
             
         })
     }
