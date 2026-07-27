@@ -27,7 +27,11 @@ struct OnBoardingLevelView: View {
             
             Button("J’ai déjà des connaissances") {
                // onComplete()
-                authService.logout()
+                Task{
+                    
+                    
+                    try await authService.logout()
+                }
             }
             .CustomButton()
         }

@@ -99,5 +99,6 @@ struct authentificationView: View {
 }
 
 #Preview {
-    authentificationView().environment(AuthService())
+    let tokenStore = TokenStore()
+    authentificationView().environment(AuthService(apiClient: APIClient(tokenStore: tokenStore), tokenStore: tokenStore))
 }

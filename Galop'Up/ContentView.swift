@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var authService = AuthService()
+    @Environment(AuthService.self) var authService
     var googleFunction = GoogleFunctions()
     var body: some View {
         ZStack{
@@ -31,7 +31,9 @@ struct ContentView: View {
                         })
                         
                         Button(action:{
-                            authService.logout()
+                            Task{
+                                try await authService.logout()
+                            }
                         }, label: {
                             Text("logout")
                         })
@@ -45,11 +47,12 @@ struct ContentView: View {
                 authentificationView()
             }
         }
-        .environment(authService)
+        
         
     }
 }
 
 #Preview {
-    ContentView()
+    let tokenStore = TokenStore()
+    ContentView().environment(AuthService(apiClient: APIClient(tokenStore: tokenStore), tokenStore: tokenStore))
 }

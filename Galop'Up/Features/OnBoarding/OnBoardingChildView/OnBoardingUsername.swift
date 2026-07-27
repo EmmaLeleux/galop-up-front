@@ -10,7 +10,7 @@ import SwiftUI
 struct OnBoardingUsername: View {
     @FocusState var isFocused
     @State var username: String = ""
-    @Environment(UserService.self) var userService
+    @Environment(AuthService.self) var authService
 
     var onComplete: () -> Void
     var body: some View {
@@ -29,7 +29,7 @@ struct OnBoardingUsername: View {
             if username != "" {
                 Button("Suivant") {
                     Task{
-                        try await userService.updateUser(userInfos: UserInfoToUpdate(username: username))
+                        try await authService.updateUser(userInfos: UserInfoToUpdate(username: username))
                         onComplete()
                     }
                     

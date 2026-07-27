@@ -10,6 +10,7 @@
 		B595B63C2F85046100C6F598 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B595B63B2F85046100C6F598 /* GoogleSignIn */; };
 		B595B63E2F85046100C6F598 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B595B63D2F85046100C6F598 /* GoogleSignInSwift */; };
 		B595B8D02FBDF2C100C6F598 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = B595B8CF2FBDF2C100C6F598 /* KeychainAccess */; };
+		B59DF95D30137232006E2530 /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = B59DF95C30137232006E2530 /* FactoryKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 			files = (
 				B595B63C2F85046100C6F598 /* GoogleSignIn in Frameworks */,
 				B595B63E2F85046100C6F598 /* GoogleSignInSwift in Frameworks */,
+				B59DF95D30137232006E2530 /* FactoryKit in Frameworks */,
 				B595B8D02FBDF2C100C6F598 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -77,6 +79,7 @@
 				B595B63B2F85046100C6F598 /* GoogleSignIn */,
 				B595B63D2F85046100C6F598 /* GoogleSignInSwift */,
 				B595B8CF2FBDF2C100C6F598 /* KeychainAccess */,
+				B59DF95C30137232006E2530 /* FactoryKit */,
 			);
 			productName = "Galop'Up";
 			productReference = B595B5632F84F4AE00C6F598 /* Galop'Up.app */;
@@ -109,6 +112,7 @@
 			packageReferences = (
 				B595B63A2F85046100C6F598 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				B595B8CE2FBDF2C100C6F598 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				B59DF95B30137232006E2530 /* XCRemoteSwiftPackageReference "Factory" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B595B5642F84F4AE00C6F598 /* Products */;
@@ -376,6 +380,14 @@
 				kind = branch;
 			};
 		};
+		B59DF95B30137232006E2530 /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -393,6 +405,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B595B8CE2FBDF2C100C6F598 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
+		};
+		B59DF95C30137232006E2530 /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B59DF95B30137232006E2530 /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -10,7 +10,6 @@ import SwiftUI
 struct OnBoardingView: View {
     @Environment(AuthService.self) var authService
     @State var onBoardingVM = OnBoardingViewModel()
-    @State var userService: UserService = UserService()
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing:0){
@@ -41,11 +40,9 @@ struct OnBoardingView: View {
         .scrollTargetBehavior(.viewAligned)
         .scrollIndicators(.hidden)
         .scrollDisabled(true)
-        .environment(userService)
         .onAppear {
         
                 onBoardingVM.position.scrollTo(id: OnBoardingPageEnum.first.id)
-                userService.setAuthService(authService)
             
             
             
@@ -55,5 +52,6 @@ struct OnBoardingView: View {
 
 
 #Preview {
-    OnBoardingView().environment(AuthService())
+    let tokenStore = TokenStore()
+    OnBoardingView().environment(AuthService(apiClient: APIClient(tokenStore: tokenStore), tokenStore: tokenStore))
 }

@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct OnBoardingProfilPicture: View {
+    @State private var avatarItem: PhotosPickerItem?
+    @State private var avatarImage: Image?
     @Environment(AuthService.self) var authService
     var onComplete: () -> Void
     
@@ -20,7 +23,26 @@ struct OnBoardingProfilPicture: View {
                 .padding(.bottom, 15)
             
             
-            Image(.profilPictureAnonyme)
+            Group{
+                
+                if let avatarImage {
+                    avatarImage
+                        .resizable()
+                    
+                }
+                else{
+                    Image(.profilPictureAnonyme)
+                    
+                        .resizable()
+                    
+                    
+                }
+            }
+            .scaledToFill()
+            .frame(width: 200, height: 200)
+            .clipShape(.circle)
+            
+            
             
             HStack{
                 Image(.profilPictureAnonyme)
@@ -35,30 +57,48 @@ struct OnBoardingProfilPicture: View {
                     .resizable()
                     .scaledToFit()
                 
-                ZStack{
-                    if let photo =  authService.currentUser?.picture{
-                        AsyncImage(url: URL(string: photo)) { image in
-                            image
+                PhotosPicker(selection: $avatarItem, matching: .images){
+                    
+                    ZStack{
+                        
+                        if let avatarImage{
+                            avatarImage
                                 .resizable()
-                                .scaledToFill()
-                                .frame(width: 150, height: 150)
+                                .scaledToFit()
                                 .clipShape(.circle)
+                        }
+                        else{
                             
-                        } placeholder: {
-                            ProgressView()
+                        
+                        if let photo =  authService.currentUser?.picture{
+                            AsyncImage(url: URL(string: photo)) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .clipShape(.circle)
+                                
+                            } placeholder: {
+                                ProgressView()
+                            }
                         }
                     }
-                    Image(.iconAppareilPhoto)
-                        .resizable()
-                        .scaledToFit()
-                        .padding(20)
-                        .overlay(
+                        Image(.iconAppareilPhoto)
+                            .resizable()
+                            .padding(20)
+                            .scaledToFit()
                             
-                            Circle()
-                                .stroke(lineWidth: 1).foregroundStyle(.darkBrown)
-                        )
-                      
+                            .overlay(
+                                
+                                Circle()
+                                    .stroke(lineWidth: 1).foregroundStyle(.darkBrown)
+                            )
+                        
+
+                        
+                    }
                 }
+
+                
             }
             .padding()
             
@@ -71,6 +111,15 @@ struct OnBoardingProfilPicture: View {
                 onComplete()
             }
             .foregroundStyle(.customBrown)
+        }
+        .onChange(of: avatarItem) {
+            Task {
+                if let loaded = try? await avatarItem?.loadTransferable(type: Image.self) {
+                    avatarImage = loaded
+                } else {
+                    print("Failed")
+                }
+            }
         }
     }
 }
