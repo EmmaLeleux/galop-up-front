@@ -39,23 +39,40 @@ struct OnBoardingProfilPicture: View {
                 }
             }
             .scaledToFill()
-            .frame(width: 200, height: 200)
+            .frame(width: 170, height: 170)
             .clipShape(.circle)
             
             
             
             HStack{
-                Image(.profilPictureAnonyme)
-                    .resizable()
-                    .scaledToFit()
+                //TODO: faire une route assignPicture qui assigne une image à un user sans uploadé de nouvelle image pour les photos proposée nativement.
                 
                 Image(.profilPictureAnonyme)
                     .resizable()
                     .scaledToFit()
+                    .frame(width: 70, height: 70)
+                
+                Spacer()
                 
                 Image(.profilPictureAnonyme)
                     .resizable()
                     .scaledToFit()
+                    .frame(width: 70, height: 70)
+                
+                Spacer()
+                
+                Button(action:{
+                    avatarImage = Image(.galopinTriste)
+                },
+                       label:{
+                    Image(.profilPictureAnonyme)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 70, height: 70)
+                })
+                
+                
+                Spacer()
                 
                 PhotosPicker(selection: $avatarItem, matching: .images){
                     
@@ -64,41 +81,48 @@ struct OnBoardingProfilPicture: View {
                         if let avatarImage{
                             avatarImage
                                 .resizable()
-                                .scaledToFit()
+                                .scaledToFill()
+                                .frame(width: 70, height: 70)
+                                .overlay(.white.opacity(0.3))
                                 .clipShape(.circle)
                         }
                         else{
                             
-                        
-                        if let photo =  authService.currentUser?.picture{
-                            AsyncImage(url: URL(string: photo)) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .clipShape(.circle)
-                                
-                            } placeholder: {
-                                ProgressView()
+                            
+                            if let photo =  authService.currentUser?.picture{
+                                AsyncImage(url: URL(string: photo.url)) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 70, height: 70)
+                                        .overlay(.white.opacity(0.3))
+                                        .clipShape(.circle)
+                                    
+                                } placeholder: {
+                                    ProgressView()
+                                }
                             }
                         }
-                    }
                         Image(.iconAppareilPhoto)
                             .resizable()
                             .padding(20)
                             .scaledToFit()
-                            
-                            .overlay(
-                                
-                                Circle()
-                                    .stroke(lineWidth: 1).foregroundStyle(.darkBrown)
-                            )
                         
-
+                        
+                        
+                        
                         
                     }
+                    .frame(width: 70, height: 70)
+                    .overlay(
+                        
+                        Circle()
+                            .stroke(lineWidth: 1).foregroundStyle(.darkBrown)
+                    )
+                    
                 }
-
                 
+             
             }
             .padding()
             

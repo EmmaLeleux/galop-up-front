@@ -76,8 +76,13 @@ actor TokenStore {
                do {
                    return try await task.value
                } catch {
+                   NotificationCenter.default.post(name: .sessionExpired, object: nil)
                    clear()
                    throw error
                }
            }
        }
+
+extension Notification.Name {
+    static let sessionExpired = Notification.Name("sessionExpired")
+}

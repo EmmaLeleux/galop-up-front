@@ -29,8 +29,13 @@ struct OnBoardingUsername: View {
             if username != "" {
                 Button("Suivant") {
                     Task{
-                        try await authService.updateUser(userInfos: UserInfoToUpdate(username: username))
-                        onComplete()
+                        do{
+                            try await authService.updateUser(userInfos: UserInfoToUpdate(username: username))
+                            onComplete()
+                        }
+                        catch{
+                            print(error)
+                        }
                     }
                     
                 }

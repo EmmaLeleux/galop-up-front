@@ -15,10 +15,16 @@ struct ContentView: View {
             Color.orangeBackground
                 .ignoresSafeArea()
         
-            if authService.isAuthenticated {
+            if authService.isCheckingSession {
+                        ProgressView() //TODO: mettre le splash screen à la place
+                    }
+            
+            else if authService.isAuthenticated {
                 if authService.currentUser?.level == nil{
                     OnBoardingView()
                 }
+               
+            
                 else{
                     VStack {
                         Button(action:{

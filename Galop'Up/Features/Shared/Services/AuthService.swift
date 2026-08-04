@@ -18,10 +18,34 @@ class AuthService {
         var currentUser: User?
         var errorMessage: String?
         var isAuthenticated: Bool { currentUser != nil }
+        var isCheckingSession = true
 
         init(apiClient: APIClient, tokenStore: TokenStore) {
             self.apiClient = apiClient
             self.tokenStore = tokenStore
+            
+            Task { [weak self] in
+                        for await _ in NotificationCenter.default.notifications(named: .sessionExpired) {
+                            self?.currentUser = nil
+                        }
+                    }
+            
+            Task { [weak self] in
+                        await self?.restoreSessionIfNeeded()
+                    }
+        }
+    
+    private func restoreSessionIfNeeded() async {
+            guard await tokenStore.accessToken != nil else {
+                isCheckingSession = false
+                return
+            }
+            do {
+                try await fetchUser()
+            } catch {
+                print(error)
+            }
+            isCheckingSession = false
         }
     
     
@@ -46,10 +70,11 @@ class AuthService {
 
         await tokenStore.setTokens(access: decoded.accessToken, refresh: decoded.refreshToken)
         errorMessage = nil
-        NotificationCenter.default.post(name: .didLogin, object: nil)
 
         try await fetchUser()
     }
+    
+
 
     func register(email: String, password: String, confirmPassword: String) async throws {
         guard let url = URL(string: "http://localhost:8080/auth/register") else {
@@ -124,7 +149,7 @@ class AuthService {
         
         let refreshToken = await tokenStore.refreshToken
 
-            _ = try await apiClient.send { token in
+        _ = try await apiClient.send { token in
                 var request = URLRequest(url: url)
                 request.httpMethod = "DELETE"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -144,18 +169,18 @@ class AuthService {
             print("mauvais url")
             return
         }
-            let data = try await apiClient.send { token in
+        let data = try await apiClient.send { token in
                 var request = URLRequest(url: url)
                 request.httpMethod = "PATCH"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
                 request.httpBody = try? JSONEncoder().encode(userInfos)
                 return request
             }
+
             currentUser = try JSONDecoder().decode(User.self, from: data)
         }
 }
 
 
-extension Notification.Name {
-    static let didLogin = Notification.Name("didLogin")
-}
+

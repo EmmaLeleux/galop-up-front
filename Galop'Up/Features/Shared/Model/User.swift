@@ -15,7 +15,7 @@ struct User: Codable, Identifiable {
     let googleId: String?
     let appleId: String?
     let level: LevelGalopUserEnum?
-    let picture: String?
+    let picture: Picture?
     let role: UserRoleEnum
     let isBanned: Bool
     let deletedAt: Date?
