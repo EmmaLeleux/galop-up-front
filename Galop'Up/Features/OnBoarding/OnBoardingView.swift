@@ -15,12 +15,34 @@ struct OnBoardingView: View {
             HStack(spacing:0){
                 ForEach(onBoardingVM.pages) { page in
                     switch page {
-                    case .page1: OnBoardingPage1(onComplete: onBoardingVM.goToPage2)
+                    case .pageUsername: OnBoardingUsername(onComplete: onBoardingVM.goToPageProfilPicture)
+                            .padding(.horizontal)
                             .containerRelativeFrame([.horizontal])
-                    case .page2: OnBoardingPage2(onComplete: authService.fetchUser)
+                        
+                    case .pageProfilPicture: OnBoardingProfilPicture(onComplete: onBoardingVM.goToPageLevel )
+                            .padding(.horizontal)
                             .containerRelativeFrame([.horizontal])
+                        
+                    case .pageLevel: OnBoardingLevelView(onCompleteBeginner: onBoardingVM.goToPageBeginnerLevel, onCompleteNotBeginner: onBoardingVM.goToPageLevelNotBeginner )
+                            .padding(.horizontal)
+                            .containerRelativeFrame([.horizontal])
+                        
+                    case .beginner: OnBoardingLevelBeginnerView(onComplete: {Task{
+                        authService.fetchUser
+                    }
+                    })
+                    .padding(.horizontal)
+                    .containerRelativeFrame([.horizontal])
+                        
+                    case .notBeginner: OnBoardingLevelBeginnerView(onComplete: {Task{
+                        authService.fetchUser
+                    }
+                    })
+                    .padding(.horizontal)
+                    .containerRelativeFrame([.horizontal])
                     }
                 }
+                
             }
             .scrollTargetLayout()
         }
@@ -29,8 +51,10 @@ struct OnBoardingView: View {
         .scrollIndicators(.hidden)
         .scrollDisabled(true)
         .onAppear {
+        
+                onBoardingVM.position.scrollTo(id: OnBoardingPageEnum.first.id)
             
-            onBoardingVM.position.scrollTo(id: OnBoardingPageEnum.first.id)
+            
             
         }
     }
@@ -38,5 +62,6 @@ struct OnBoardingView: View {
 
 
 #Preview {
-    OnBoardingView().environment(AuthService())
+    let tokenStore = TokenStore()
+    OnBoardingView().environment(AuthService(apiClient: APIClient(tokenStore: tokenStore), tokenStore: tokenStore))
 }

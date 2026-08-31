@@ -29,8 +29,7 @@ struct authentificationView: View {
                 
                 Image(.galopinHeureux)
                     .resizable()
-                    .scaledToFit()
-                    .frame(height: 184)
+                    .mascotteSize()
                     .padding(.bottom, -85)
                     .padding(.top, -10)
                     .zIndex(1)
@@ -100,5 +99,6 @@ struct authentificationView: View {
 }
 
 #Preview {
-    authentificationView().environment(AuthService())
+    let tokenStore = TokenStore()
+    authentificationView().environment(AuthService(apiClient: APIClient(tokenStore: tokenStore), tokenStore: tokenStore))
 }

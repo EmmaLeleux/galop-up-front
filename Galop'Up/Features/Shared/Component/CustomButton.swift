@@ -1,5 +1,5 @@
 //
-//  OrangeButtonComponent.swift
+//  CustomButtonComponent.swift
 //  Galop'Up
 //
 //  Created by Emma on 27/05/2026.
@@ -8,8 +8,11 @@
 import SwiftUI
 
 extension View {
+    
+    
     @ViewBuilder
-    func orangeButton(
+    func CustomButton(fontColor: Color = .orangeBackground,
+                      backgroundColor: Color = .orangeButton,
     ) -> some View {
 
             self
@@ -17,8 +20,8 @@ extension View {
             .padding(.horizontal, 16)
             .font(.custom("Lato-Bold", size: 14))
             .frame(maxWidth: .infinity)
-            .foregroundStyle(.orangeBackground)
-            .background(.orangeButton)
+            .foregroundStyle(fontColor)
+            .background(backgroundColor)
             .clipShape(Capsule())
     }
 }

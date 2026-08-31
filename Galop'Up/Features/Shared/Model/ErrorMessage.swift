@@ -20,6 +20,9 @@ struct ErrorResponse: Codable {
             "NOT_STRONG_ENOUGH": "Le mot de passe doit contenir au moins 8 caractères, 1 chiffre et 1 caractère spécial.",
             "PASSWORDS_NOT_CHECKED": "Les mots de passe ne correspondent pas.",
             "NO_GOOGLE_BODY": "Le corps de la demande Google est vide. Veuillez réessayer.",
+            "INVALID_MEDIA":"Les formats de fichiers acceptés sont uniquement JPEG, PNG et WebP.",
+            "INVALID_CONTENT_TYPE":"Le fichier que vous avez envoyé n'est pas une image.",
+            "ERROR_UPLOADING_PICTURE":"Une erreur est survenue pendant l'enregistrement de l'image. Veuillez réessayer."
         ]
         
         var localizedMessage: String {

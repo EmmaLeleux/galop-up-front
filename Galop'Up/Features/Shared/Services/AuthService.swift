@@ -10,398 +10,220 @@ import Observation
 import KeychainAccess
 
 @Observable
+@MainActor
 class AuthService {
-    private let keychain = Keychain(service: "emma.Galop-Up")
-    var accessToken: String? {
-        didSet {
-            if let accessToken = accessToken {
-                try? keychain.set(accessToken, key: "authToken")
-            } else {
-                try? keychain.remove("authToken")
-            }
-        }
-    }
+    private let apiClient: APIClient
+    private let tokenStore: TokenStore
     
-    var refreshToken: String? {
-        didSet {
-            if let refreshToken = refreshToken {
-                try? keychain.set(refreshToken, key: "refreshToken")
-            } else {
-                try? keychain.remove("refreshToken")
-            }
-        }
-    }
+    var currentUser: User?
+    var errorMessage: String?
+    var isAuthenticated: Bool { currentUser != nil }
+    var isCheckingSession = true
     
-    var expirationDate: Date? {
-        didSet {
-            if let date = expirationDate {
-                try? keychain.set(ISO8601DateFormatter().string(from: date), key: "expirationDate")
-            } else {
-                try? keychain.remove("expirationDate")
-            }
-        }
-    }
-    
-    var currentUser: User? {
-        didSet {
-            if let encoded = try? JSONEncoder().encode(currentUser) {
-                try? keychain.set(encoded, key: "currentUser")
-            } else {
-                try? keychain.remove("currentUser")
-            }
-        }
-    }
-    
-    var errorMessage: String? = nil
-    var isAuthenticated: Bool {
-        return accessToken != nil && currentUser != nil && refreshToken != nil
-    }
-    
-    
-    init() {
+    init(apiClient: APIClient, tokenStore: TokenStore) {
+        self.apiClient = apiClient
+        self.tokenStore = tokenStore
         
-        accessToken = try? keychain.get("authToken") ?? nil
-        refreshToken = try? keychain.get("refreshToken") ?? nil
-        
-        if let dateString = try? keychain.get("expirationDate"),
-           let expiration = ISO8601DateFormatter().date(from: dateString){
-            expirationDate = expiration
+        Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: .sessionExpired) {
+                self?.currentUser = nil
+            }
         }
-        if let data = try? keychain.getData("currentUser"),
-           let user = try? JSONDecoder().decode(User.self, from: data) {
-            currentUser = user
+        
+        Task { [weak self] in
+            await self?.restoreSessionIfNeeded()
         }
     }
     
-    func fetchUser() {
+    private func restoreSessionIfNeeded() async {
+        guard await tokenStore.accessToken != nil else {
+            isCheckingSession = false
+            return
+        }
+        do {
+            try await fetchUser()
+        } catch {
+            print(error)
+        }
+        isCheckingSession = false
+    }
+    
+    
+    func fetchUser() async throws {
         guard let url = URL(string: "http://localhost:8080/user/me") else {
             print("Wrong URL")
             return
         }
-        if expirationDate == nil || Date() > expirationDate! {
-           
-            refreshAccessToken { success in
-                        guard success else { return }
-                        self.fetchUser()
-                    }
-            
-                    return
-            
-            
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        guard let accessToken = accessToken else {
-            print("Token manquant")
-            return
-        }
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let data = data {
-                do{
-                    let decodedUser = try JSONDecoder().decode(User.self, from: data)
-                    DispatchQueue.main.async {
-                        self.currentUser = decodedUser
-                    }
-                }
-                catch {
-                    print("Error decoding: \(error)")
-                }
-            }
-            else if let error {
-                print("Error: \(error)")
-            }
+        let data = try await apiClient.send { token in
+            var request = URLRequest(url: url)
+            request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+            return request
         }
-        .resume()
+        print("Réponse brute fetchUser : \(String(data: data, encoding: .utf8) ?? "illisible")")  // <- AJOUTE ÇA
+        
+        
+        currentUser = try JSONDecoder().decode(User.self, from: data)
     }
     
-    func register(email: String, password: String, confirmPassword: String) {
+    private func handleAuthResponse(_ data: Data) async throws {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(LoginResponse.self, from: data)
+        
+        await tokenStore.setTokens(access: decoded.accessToken, refresh: decoded.refreshToken)
+        errorMessage = nil
+        
+        try await fetchUser()
+    }
+    
+    
+    
+    func register(email: String, password: String, confirmPassword: String) async throws {
         guard let url = URL(string: "http://localhost:8080/auth/register") else {
             print("Wrong URL")
             return
         }
         
-        guard password != "" && confirmPassword != "" && email != "" else {
-            self.errorMessage = "Veuillez renseigner tout les champs."
+        guard !password.isEmpty && !confirmPassword.isEmpty && !email.isEmpty else {
+            errorMessage = "Veuillez renseigner tout les champs."
             return
         }
-        
         guard password == confirmPassword else {
-            self.errorMessage = "Les deux mot de passe ne correspondent pas."
+            errorMessage = "Les deux mot de passe ne correspondent pas."
+            return
+        }
+        guard email.contains("@"), email.contains(".") else {
+            errorMessage = "Veuillez entrer un email valide"
             return
         }
         
-        guard email.contains("@") == true || email.contains(".") == true else{
-            self.errorMessage = "Veuillez entrer un email valide"
-            return
-        }
-        
-        let body: [String: String] = [
-            "email": email,
-            "password": password,
-            "confirmPassword": confirmPassword
-        ]
+        let body = ["email": email, "password": password, "confirmPassword": confirmPassword]
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        //route public
+        request.httpBody = try JSONEncoder().encode(body)
         
-        do {
-            
-            
-            request.httpBody = try JSONEncoder().encode(body)
-        } catch {
-            print("Error encodage body: \(error)")
-            return
-        }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.fetchUser()
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                    }
-                } catch{
-                    DispatchQueue.main.async {
-                        if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                            self.errorMessage = errorResponse.localizedMessage
-                        } else {
-                            self.errorMessage = "Une erreur est survenue. Merci de réessayer"
-                        }
-                    }
-                }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Network error: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
+        let (data, _) = try await URLSession.shared.data(for: request)
+        try await handleAuthResponse(data)
     }
     
-    func login(email: String, password: String) {
+    func login(email: String, password: String) async throws {
         guard let url = URL(string: "http://localhost:8080/auth/login") else {
             print("Wrong URL")
             return
         }
         
-        //créer le json  à envoyer
-        let body: [String: String] = [
-            "email": email,
-            "password": password
-        ]
+        let body = ["email": email, "password": password]
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        //pas besoin d'authentification dans cette route, route public
+        request.httpBody = try JSONEncoder().encode(body)
         
-        do {
-            
-            
-            request.httpBody = try JSONEncoder().encode(body)
-        } catch {
-            print("Error encodage body: \(error)")
-            return
-        }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.fetchUser()
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.errorMessage = "identifiant ou mot de passe incorrect"
-                    }
-                }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Network error: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
+        let (data, _) = try await URLSession.shared.data(for: request)
+        try await handleAuthResponse(data)
     }
     
-    
-    func loginWithGoogle(googleToken: String){
+    func loginWithGoogle(googleToken: String) async throws {
         guard let url = URL(string: "http://localhost:8080/auth/google") else {
             print("Wrong URL")
             return
         }
         
-        let body: [String: String] = ["token": googleToken]
+        let body = ["token": googleToken]
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
         
-        do {
-            request.httpBody = try JSONEncoder().encode(body)
-        } catch {
-            print("Erreur encodage body: \(error)")
-            return
-        }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.fetchUser()
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.errorMessage = "impossible de se connecter avec ce compte. Veuillez réessayer"
-                    }
-                }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "network error: \(error.localizedDescription)"
-                }
-            }
-        }.resume()
-        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        try await handleAuthResponse(data)
     }
     
-    func logout(){
+    func logout() async throws{
         guard let url = URL(string: "http://localhost:8080/auth/logout")
         else {
             print("mauvais url")
             return
         }
         
-        let body: [String: String] = ["refreshToken": self.refreshToken ?? ""]
+        let refreshToken = await tokenStore.refreshToken
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(self.accessToken ?? "")", forHTTPHeaderField: "Authorization")
-        
-        do {
-            request.httpBody = try JSONEncoder().encode(body)
-        } catch {
-            print("Erreur encodage body: \(error)")
-            return
+        _ = try await apiClient.send { token in
+            var request = URLRequest(url: url)
+            request.httpMethod = "DELETE"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+            request.httpBody = try? JSONEncoder().encode(["refreshToken": refreshToken ?? ""])
+            return request
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    print("erreur:", error)
-                    return
-                }
-
-                if let httpResponse = response as? HTTPURLResponse {
-                    self.accessToken = nil
-                    self.currentUser = nil
-                    self.refreshToken = nil
-                    self.expirationDate = nil
-                    print("status:", httpResponse.statusCode)
-                }
-
-                if let data = data {
-                    print("réponse:", String(data: data, encoding: .utf8) ?? "vide")
-                }
-
-            }.resume()
+        currentUser = nil
+        await tokenStore.clear()
     }
     
-    func refreshAccessToken(completion: @escaping (Bool) -> Void){
-        guard let url = URL(string: "http://localhost:8080/auth/refresh-token") else {
-            print("Wrong URL")
+    
+    func updateUser(userInfos: UserInfoToUpdate) async throws {
+        guard let url = URL(string: "http://localhost:8080/user")
+        else {
+            print("mauvais url")
             return
         }
         
         
-        //créer le json  à envoyer
-        let body: [String: String] = [
-            "refreshToken": self.refreshToken ?? "",
-            "userId": self.currentUser?.id.description ?? ""
-        ]
+        let boundary = UUID().uuidString
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        //pas besoin d'authentification dans cette route, route public
-        
-        do {
+        let data = try await apiClient.send { token in
+            var request = URLRequest(url: url)
+            request.httpMethod = "PATCH"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+            request.httpBody = Self.buildMultipartBody(userInfos: userInfos, boundary: boundary)
             
-            
-            request.httpBody = try JSONEncoder().encode(body)
-        } catch {
-            print("Error encodage body: \(error)")
-            return
+            return request
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data {
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    let decoded = try decoder.decode(LoginResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.accessToken = decoded.accessToken
-                        self.refreshToken = decoded.refreshToken
-                        self.expirationDate = decoded.accessTokenExpiration
-                        self.errorMessage = nil
-                        
-                        UserDefaults.standard.set(decoded.accessToken, forKey: "authToken")
-                        NotificationCenter.default.post(name: .didLogin, object: nil)
-                        completion(true)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.accessToken = nil
-                        self.refreshToken = nil
-                        self.currentUser = nil
-                        self.expirationDate = nil
-                        self.errorMessage = "vous avez été déconnecté, veuillez vous reconnecter"
-                        completion(false)
-                    }
-                }
-            } else if let error {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Network error: \(error.localizedDescription)"
-                    completion(false)
-                }
-            }
-        }.resume()
+        currentUser = try JSONDecoder().decode(User.self, from: data)
+    }
+    
+    private static func buildMultipartBody(userInfos: UserInfoToUpdate, boundary: String) -> Data {
+        var body = Data()
+        
+        func appendField(name: String, value: String) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
+        
+        if let username = userInfos.username {
+            appendField(name: "username", value: username)
+        }
+        
+        if let pictureInBase = userInfos.pictureInBase {
+            appendField(name: "pictureInBase", value: pictureInBase.uuidString)
+        }
+        
+        if let level = userInfos.level {
+            appendField(name: "level", value: "\(level.rawValue)")
+        }
+        
+        if let imageData = userInfos.picture {
+            let info = detectImageFileInfo(from: imageData)
+            
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"picture\"; filename=\"avatar.\(info.fileExtension)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: \(info.mimeType)\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+        
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        return body
     }
 }
 
 
-extension Notification.Name {
-    static let didLogin = Notification.Name("didLogin")
-}
+

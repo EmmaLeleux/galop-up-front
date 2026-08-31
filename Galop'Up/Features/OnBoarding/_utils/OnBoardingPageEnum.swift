@@ -6,10 +6,13 @@
 //
 
 enum OnBoardingPageEnum: String, Identifiable, CaseIterable {
-    case page1
-    case page2
+    case pageUsername
+    case pageProfilPicture
+    case pageLevel
+    case beginner
+    case notBeginner
     
 
     var id: String { rawValue }
-    static var first: Self = .page1
+    static var first: Self = .pageUsername
 }

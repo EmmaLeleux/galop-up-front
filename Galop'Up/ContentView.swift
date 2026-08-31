@@ -8,33 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var authService = AuthService()
+    @Environment(AuthService.self) var authService
     var googleFunction = GoogleFunctions()
     var body: some View {
         ZStack{
             Color.orangeBackground
                 .ignoresSafeArea()
         
-            if authService.isAuthenticated {
+            if authService.isCheckingSession {
+                        ProgressView() //TODO: mettre le splash screen à la place
+                    }
+            
+            else if authService.isAuthenticated {
                 if authService.currentUser?.level == nil{
                     OnBoardingView()
                 }
+               
+            
                 else{
-                    VStack {
-                        Button(action:{
-                            authService.fetchUser()
-                        }, label: {
-                            Text("fetch")
-                        })
-                        
-                        Button(action:{
-                            authService.logout()
-                        }, label: {
-                            Text("logout")
-                        })
-                        
-                    }
-                    .padding()
+                    ForumView()
                 }
                 
             }
@@ -42,11 +34,12 @@ struct ContentView: View {
                 authentificationView()
             }
         }
-        .environment(authService)
+        
         
     }
 }
 
 #Preview {
-    ContentView()
+    let tokenStore = TokenStore()
+    ContentView().environment(AuthService(apiClient: APIClient(tokenStore: tokenStore), tokenStore: tokenStore))
 }

@@ -25,11 +25,14 @@ struct ConnexionView: View {
         }
         
         Button(action:{
-            authService.login(email: email, password: password)
+            Task{
+                try await authService.login(email: email, password: password)
+            }
+            
         }, label: {
             
             Text("Se connecter")
-                .orangeButton()
+                .CustomButton()
             
         })
     }
