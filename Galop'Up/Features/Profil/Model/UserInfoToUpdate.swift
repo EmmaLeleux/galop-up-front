@@ -9,6 +9,7 @@ import Foundation
 
 struct UserInfoToUpdate: Codable{
     var username: String?
-    var profilePicture: String?
+    var picture: Data?
+    var pictureInBase: UUID?
     var level: LevelGalopUserEnum?
 }

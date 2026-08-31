@@ -23,13 +23,23 @@ struct OnBoardingView: View {
                             .padding(.horizontal)
                             .containerRelativeFrame([.horizontal])
                         
-                    case .pageLevel: OnBoardingLevelView(onComplete: {
-                        Task{
-                            authService.fetchUser
-                        }
-                    } )
+                    case .pageLevel: OnBoardingLevelView(onCompleteBeginner: onBoardingVM.goToPageBeginnerLevel, onCompleteNotBeginner: onBoardingVM.goToPageLevelNotBeginner )
                             .padding(.horizontal)
                             .containerRelativeFrame([.horizontal])
+                        
+                    case .beginner: OnBoardingLevelBeginnerView(onComplete: {Task{
+                        authService.fetchUser
+                    }
+                    })
+                    .padding(.horizontal)
+                    .containerRelativeFrame([.horizontal])
+                        
+                    case .notBeginner: OnBoardingLevelBeginnerView(onComplete: {Task{
+                        authService.fetchUser
+                    }
+                    })
+                    .padding(.horizontal)
+                    .containerRelativeFrame([.horizontal])
                     }
                 }
                 

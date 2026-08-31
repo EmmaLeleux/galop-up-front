@@ -23,6 +23,8 @@ class OnBoardingViewModel {
 
     func goToPageProfilPicture() { scrollToPage(.pageProfilPicture) }
     func goToPageLevel() { scrollToPage(.pageLevel) }
+    func goToPageBeginnerLevel() { scrollToPage(.beginner)}
+    func goToPageLevelNotBeginner() { scrollToPage(.notBeginner)}
     
     
 }

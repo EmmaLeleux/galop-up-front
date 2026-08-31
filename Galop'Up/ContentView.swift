@@ -26,26 +26,7 @@ struct ContentView: View {
                
             
                 else{
-                    VStack {
-                        Button(action:{
-                            Task{
-                               try await authService.fetchUser()
-                            }
-                            
-                        }, label: {
-                            Text("fetch")
-                        })
-                        
-                        Button(action:{
-                            Task{
-                                try await authService.logout()
-                            }
-                        }, label: {
-                            Text("logout")
-                        })
-                        
-                    }
-                    .padding()
+                    ForumView()
                 }
                 
             }

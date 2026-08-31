@@ -9,6 +9,8 @@ enum OnBoardingPageEnum: String, Identifiable, CaseIterable {
     case pageUsername
     case pageProfilPicture
     case pageLevel
+    case beginner
+    case notBeginner
     
 
     var id: String { rawValue }

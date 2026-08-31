@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct OnBoardingLevelView: View {
-    var onComplete: () -> Void
+    var onCompleteBeginner: () -> Void
+    var onCompleteNotBeginner: () -> Void
     @Environment(AuthService.self) var authService
 
     var body: some View {
@@ -21,12 +22,12 @@ struct OnBoardingLevelView: View {
             
             
             Button("Je débute") {
-                onComplete()
+                onCompleteBeginner()
             }
             .CustomButton()
             
             Button("J’ai déjà des connaissances") {
-               // onComplete()
+                onCompleteNotBeginner()
                 Task{
                     
                     
