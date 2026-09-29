@@ -13,6 +13,10 @@ struct Post: Codable, Identifiable {
     let content: String
     let pictures: [Picture]
     let author: User
-    let nblikes: Int
-    let createdAt: Date?
+    let createdAt: Date
+    var likes: [User]
+    var isLikeByMe: Bool
+    
 }
+
+

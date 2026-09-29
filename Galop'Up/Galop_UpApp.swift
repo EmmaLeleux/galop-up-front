@@ -11,12 +11,16 @@ import SwiftUI
 struct Galop_UpApp: App {
     let authService: AuthService
     let pictureService: PictureService
+    let postService: PostService
+    let quizService: QuizService
 
     init() {
             let tokenStore = TokenStore()
             let apiClient = APIClient(tokenStore: tokenStore)
             authService = AuthService(apiClient: apiClient, tokenStore: tokenStore)
         pictureService = PictureService(apiClient: apiClient)
+        postService = PostService(apiClient: apiClient)
+        quizService = QuizService(apiClient: apiClient)
         }
     
     var body: some Scene {
@@ -24,6 +28,8 @@ struct Galop_UpApp: App {
             ContentView()
                 .environment(authService)
                 .environment(pictureService)
+                .environment(postService)
+                .environment(quizService)
         }
     }
 }

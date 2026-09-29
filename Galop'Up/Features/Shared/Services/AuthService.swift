@@ -60,7 +60,6 @@ class AuthService {
             request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
             return request
         }
-        print("Réponse brute fetchUser : \(String(data: data, encoding: .utf8) ?? "illisible")")  // <- AJOUTE ÇA
         
         
         currentUser = try JSONDecoder().decode(User.self, from: data)

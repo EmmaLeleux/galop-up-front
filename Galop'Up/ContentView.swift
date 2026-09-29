@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(AuthService.self) var authService
+    @Environment(\.scenePhase) private var scenePhase
     var googleFunction = GoogleFunctions()
     var body: some View {
         ZStack{
@@ -26,7 +27,43 @@ struct ContentView: View {
                
             
                 else{
-                    ForumView()
+                    TabView{
+                        
+                        
+                        DashboardQuizView()
+                            .tabItem {
+                                Image(.chronoIcon)
+                                
+                                Text("S'entraîner")
+                            }
+                        
+                        
+                        LessonView()
+                            .tabItem {
+                                Image(.bookIcon)
+                                
+                                Text("Apprendre")
+                            }
+                        
+                        
+                        EventView()
+                            .tabItem {
+                                Image(.horseTrailer)
+                                
+                                Text("Evènements")
+                            }
+                        
+                        
+                        
+                        ForumView()
+                            .tabItem {
+                                Image(.horseSpeaking)
+                                
+                                Text("Forum")
+                            }
+                    }
+                    .tint(.customBrown)
+                    .foregroundStyle(.customBrown)
                 }
                 
             }
@@ -34,6 +71,13 @@ struct ContentView: View {
                 authentificationView()
             }
         }
+        .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        Task {
+                            try? await authService.fetchUser()
+                        }
+                    }
+                }
         
         
     }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Picture : Codable, Identifiable {
+struct Picture : Codable, Identifiable, Hashable {
     let id: UUID
     let key: String
     let name: String

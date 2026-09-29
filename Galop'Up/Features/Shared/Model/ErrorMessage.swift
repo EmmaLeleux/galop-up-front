@@ -22,7 +22,11 @@ struct ErrorResponse: Codable {
             "NO_GOOGLE_BODY": "Le corps de la demande Google est vide. Veuillez réessayer.",
             "INVALID_MEDIA":"Les formats de fichiers acceptés sont uniquement JPEG, PNG et WebP.",
             "INVALID_CONTENT_TYPE":"Le fichier que vous avez envoyé n'est pas une image.",
-            "ERROR_UPLOADING_PICTURE":"Une erreur est survenue pendant l'enregistrement de l'image. Veuillez réessayer."
+            "ERROR_UPLOADING_PICTURE":"Une erreur est survenue pendant l'enregistrement de l'image. Veuillez réessayer.",
+            "POST_NOT_CREATED":"Une erreur est survenue lors de la création de votre publication. Veuillez réessayer.",
+            "CANNOT_UPDATE_BOTH_PICTURE_AND_PICTURE_IN_BASE": "Vous ne devez choisir qu'une seule image pour votre photo de profil.",
+            "TOO_MANY_POST_PICTURES": "Vous ne pouvez pas ajouter plus de 4 images à votre publication.",
+            "NOT_ENOUGH_PERMISSION": "Vous n'avez pas la permission de réaliser cette action."
         ]
         
         var localizedMessage: String {

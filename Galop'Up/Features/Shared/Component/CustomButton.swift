@@ -11,15 +11,16 @@ extension View {
     
     
     @ViewBuilder
-    func CustomButton(fontColor: Color = .orangeBackground,
+    func CustomButton(fontColor: Color = .customWhite,
                       backgroundColor: Color = .orangeButton,
+                      width: CGFloat? = .infinity
     ) -> some View {
-
-            self
+        
+        self
             .padding(.vertical, 8)
             .padding(.horizontal, 16)
             .font(.custom("Lato-Bold", size: 14))
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: width)
             .foregroundStyle(fontColor)
             .background(backgroundColor)
             .clipShape(Capsule())
