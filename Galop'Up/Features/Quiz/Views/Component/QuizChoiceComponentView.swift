@@ -8,22 +8,31 @@
 import SwiftUI
 
 struct QuizChoiceComponentView: View {
-    var quiz: Quiz
+    var quiz: TypeQuizEnum
     var body: some View {
         HStack{
-            VStack{
-                Text(quiz.type.rawValue)
+            VStack(alignment: .leading){
+                Text(quiz.rawValue)
+                    .font(.custom("Nunito", size: 24))
+                    .fontWeight(.bold)
                 
                 Text(quiz.description)
+                    .font(.custom("Lato-Bold", size: 16))
+                    .multilineTextAlignment(.leading)
             }
             
-            AsyncImage(url: URL(string: quiz.picture.url)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-            } placeholder: {
-                ProgressView()
-            }
+            Spacer()
+            
+            Image(quiz.image)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 150)
+            
+        }
+        .padding()
+        .background{
+            RoundedRectangle(cornerRadius: 15).stroke(.customBrown, lineWidth: 2).fill(.customWhite)
+                .shadow(color: .shadow.opacity(0.2), radius: 12, y: -2)
         }
     }
 }

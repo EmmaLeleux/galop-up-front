@@ -1,0 +1,239 @@
+//
+//  AuthViewModel.swift
+//  Galop'Up
+//
+//  Created by Emma on 20/05/2026.
+//
+
+import Foundation
+import Observation
+import KeychainAccess
+
+@Observable
+@MainActor
+class AuthViewModel {
+    private let apiClient: APIClient
+    private let tokenStore: TokenStore
+    
+    var currentUser: User?
+    var errorMessage: String?
+    var isAuthenticated: Bool { currentUser != nil }
+    var isCheckingSession = true
+    
+    init(apiClient: APIClient, tokenStore: TokenStore) {
+        self.apiClient = apiClient
+        self.tokenStore = tokenStore
+        
+        Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: .sessionExpired) {
+                self?.currentUser = nil
+            }
+        }
+        
+        Task { [weak self] in
+            await self?.restoreSessionIfNeeded()
+        }
+    }
+    
+    private func restoreSessionIfNeeded() async {
+        guard await tokenStore.accessToken != nil else {
+            isCheckingSession = false
+            return
+        }
+        do {
+            try await fetchUser()
+        } catch {
+            print(error)
+        }
+        isCheckingSession = false
+    }
+    
+    
+    func fetchUser() async throws {
+        guard let url = URL(string: "http://localhost:8080/user/me") else {
+            print("Wrong URL")
+            return
+        }
+        
+        let data = try await apiClient.send { token in
+            var request = URLRequest(url: url)
+            request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+            return request
+        }
+        
+        
+        currentUser = try JSONDecoder().decode(User.self, from: data)
+    }
+    
+    private func handleAuthResponse(_ data: Data) async throws {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(LoginResponse.self, from: data)
+        
+        await tokenStore.setTokens(access: decoded.accessToken, refresh: decoded.refreshToken)
+        errorMessage = nil
+        
+        try await fetchUser()
+    }
+    
+    
+    
+    func register(email: String, password: String, confirmPassword: String) async throws {
+        guard let url = URL(string: "http://localhost:8080/auth/register") else {
+            print("Wrong URL")
+            return
+        }
+        
+        guard !password.isEmpty && !confirmPassword.isEmpty && !email.isEmpty else {
+            errorMessage = "Veuillez renseigner tout les champs."
+            return
+        }
+        guard password == confirmPassword else {
+            errorMessage = "Les deux mot de passe ne correspondent pas."
+            return
+        }
+        guard email.contains("@"), email.contains(".") else {
+            errorMessage = "Veuillez entrer un email valide"
+            return
+        }
+        
+        let body = ["email": email, "password": password, "confirmPassword": confirmPassword]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        try await authRequest(request)
+    }
+    
+    func login(email: String, password: String) async throws {
+        guard let url = URL(string: "http://localhost:8080/auth/login") else {
+            print("Wrong URL")
+            return
+        }
+        
+        let body = ["email": email, "password": password]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        try await authRequest(request)
+    }
+    
+    func loginWithGoogle(googleToken: String) async throws {
+        guard let url = URL(string: "http://localhost:8080/auth/google") else {
+            print("Wrong URL")
+            return
+        }
+        
+        let body = ["token": googleToken]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        try await authRequest(request)
+    }
+    
+    func logout() async throws{
+        guard let url = URL(string: "http://localhost:8080/auth/logout")
+        else {
+            print("mauvais url")
+            return
+        }
+        
+        let refreshToken = await tokenStore.refreshToken
+        
+        _ = try await apiClient.send { token in
+            var request = URLRequest(url: url)
+            request.httpMethod = "DELETE"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+            request.httpBody = try? JSONEncoder().encode(["refreshToken": refreshToken ?? ""])
+            return request
+        }
+        
+        currentUser = nil
+        await tokenStore.clear()
+    }
+    
+    
+    func updateUser(userInfos: UserInfoToUpdate) async throws {
+        guard let url = URL(string: "http://localhost:8080/user")
+        else {
+            print("mauvais url")
+            return
+        }
+        
+        
+        let boundary = UUID().uuidString
+        
+        let data = try await apiClient.send { token in
+            var request = URLRequest(url: url)
+            request.httpMethod = "PATCH"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+            request.httpBody = Self.buildMultipartBody(userInfos: userInfos, boundary: boundary)
+            
+            return request
+        }
+        
+        currentUser = try JSONDecoder().decode(User.self, from: data)
+    }
+    
+    private static func buildMultipartBody(userInfos: UserInfoToUpdate, boundary: String) -> Data {
+        var body = Data()
+        
+        func appendField(name: String, value: String) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
+        
+        if let username = userInfos.username {
+            appendField(name: "username", value: username)
+        }
+        
+        if let pictureInBase = userInfos.pictureInBase {
+            appendField(name: "pictureInBase", value: pictureInBase.uuidString)
+        }
+        
+        if let level = userInfos.level {
+            appendField(name: "level", value: "\(level.rawValue)")
+        }
+        
+        if let imageData = userInfos.picture {
+            let info = detectImageFileInfo(from: imageData)
+            
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"picture\"; filename=\"avatar.\(info.fileExtension)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: \(info.mimeType)\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+        
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        return body
+    }
+    
+    private func authRequest(_ request: URLRequest) async throws {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let http = response as? HTTPURLResponse,
+              (200...299).contains(http.statusCode) else {
+            let error = (try? JSONDecoder().decode(ErrorResponse.self, from: data))
+            ?? ErrorResponse(reason: "UNKNOWN_ERROR")
+            errorMessage = error.localizedMessage
+            return
+        }
+        
+        try await handleAuthResponse(data)
+    }
+}
+
+
+

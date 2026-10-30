@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(AuthService.self) var authService
+    @Environment(AuthViewModel.self) var authVM
+    @Environment(QuizSessionViewModel.self) var quizVM
     @Environment(\.scenePhase) private var scenePhase
     var googleFunction = GoogleFunctions()
     var body: some View {
@@ -16,56 +17,69 @@ struct ContentView: View {
             Color.orangeBackground
                 .ignoresSafeArea()
         
-            if authService.isCheckingSession {
+            if authVM.isCheckingSession {
                         ProgressView() //TODO: mettre le splash screen à la place
                     }
             
-            else if authService.isAuthenticated {
-                if authService.currentUser?.level == nil{
+            else if authVM.isAuthenticated {
+
+                if authVM.currentUser?.level == nil{
                     OnBoardingView()
                 }
                
             
                 else{
-                    TabView{
-                        
-                        
-                        DashboardQuizView()
-                            .tabItem {
-                                Image(.chronoIcon)
-                                
-                                Text("S'entraîner")
+                        if let session = quizVM.activeSession {
+                            QuizGameView()
+                                    .transition(.move(edge: .bottom))
+                                    .zIndex(1)
                             }
                         
-                        
-                        LessonView()
-                            .tabItem {
-                                Image(.bookIcon)
+                    else{
+                        NavigationStack{
+                            TabView{
                                 
-                                Text("Apprendre")
-                            }
-                        
-                        
-                        EventView()
-                            .tabItem {
-                                Image(.horseTrailer)
                                 
-                                Text("Evènements")
-                            }
-                        
-                        
-                        
-                        ForumView()
-                            .tabItem {
-                                Image(.horseSpeaking)
+                                DashboardQuizView()
+                                    .tabItem {
+                                        Image(.chronoIcon)
+                                        
+                                        Text("S'entraîner")
+                                    }
                                 
-                                Text("Forum")
+                                
+                                LessonView()
+                                    .tabItem {
+                                        Image(.bookIcon)
+                                        
+                                        Text("Apprendre")
+                                    }
+                                
+                                
+                                EventView()
+                                    .tabItem {
+                                        Image(.horseTrailer)
+                                        
+                                        Text("Evènements")
+                                    }
+                                
+                                
+                                
+                                ForumView()
+                                    .tabItem {
+                                        Image(.horseSpeaking)
+                                        
+                                        Text("Forum")
+                                    }
                             }
+                            .tint(.customBrown)
+                            .foregroundStyle(.customBrown)
+                        }
                     }
-                    .tint(.customBrown)
-                    .foregroundStyle(.customBrown)
                 }
                 
+            ErrorMessageComponentView()
+
             }
             else{
                 authentificationView()
@@ -74,7 +88,7 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
                         Task {
-                            try? await authService.fetchUser()
+                            try? await authVM.fetchUser()
                         }
                     }
                 }
@@ -83,7 +97,3 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    let tokenStore = TokenStore()
-    ContentView().environment(AuthService(apiClient: APIClient(tokenStore: tokenStore), tokenStore: tokenStore))
-}

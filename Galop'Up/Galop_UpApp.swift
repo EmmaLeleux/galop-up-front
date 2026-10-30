@@ -9,27 +9,31 @@ import SwiftUI
 
 @main
 struct Galop_UpApp: App {
-    let authService: AuthService
-    let pictureService: PictureService
-    let postService: PostService
-    let quizService: QuizService
-
+    let authVM: AuthViewModel
+    let pictureVM: PictureViewModel
+    let postVM: PostViewModel
+    let quizVM: QuizSessionViewModel
+    let errorVM: ErrorViewModel
+    
     init() {
-            let tokenStore = TokenStore()
-            let apiClient = APIClient(tokenStore: tokenStore)
-            authService = AuthService(apiClient: apiClient, tokenStore: tokenStore)
-        pictureService = PictureService(apiClient: apiClient)
-        postService = PostService(apiClient: apiClient)
-        quizService = QuizService(apiClient: apiClient)
-        }
+        let tokenStore = TokenStore()
+        errorVM = ErrorViewModel()
+        let apiClient = APIClient(tokenStore: tokenStore, errorViewModel: errorVM)
+        authVM = AuthViewModel(apiClient: apiClient, tokenStore: tokenStore)
+        pictureVM = PictureViewModel(apiClient: apiClient)
+        postVM = PostViewModel(apiClient: apiClient)
+        quizVM = QuizSessionViewModel(apiClient: apiClient)
+    }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(authService)
-                .environment(pictureService)
-                .environment(postService)
-                .environment(quizService)
+                .environment(authVM)
+                .environment(pictureVM)
+                .environment(postVM)
+                .environment(quizVM)
+                .environment(errorVM)
+                
         }
     }
 }

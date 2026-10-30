@@ -8,19 +8,29 @@
 import SwiftUI
 
 struct DashboardQuizView: View {
-    @Environment(QuizService.self) var quizService
-    
+    @Environment(AuthViewModel.self) var authVM
+
     var body: some View {
-        VStack{
-            ForEach(quizService.quizzes, id: \.self){ quiz in
-                
-                QuizChoiceComponentView(quiz: quiz)
+        ZStack{
+            Color.orangeBackground.ignoresSafeArea()
+            VStack(spacing: 20){
+                HStack{
+                    Spacer()
+                    NavigationLink(destination: ProfilView(), label: {
+                        ProfilPictureComponentView(pictureUser: authVM.currentUser?.picture)
+                    })
+                    .padding(.trailing)
+                }
+                ForEach(TypeQuizEnum.allCases, id: \.self){ quiz in
+                    
+                    NavigationLink(
+                        destination: DifficultyChoiceView(quiz: quiz),
+                        label: {QuizChoiceComponentView(quiz: quiz)}
+                    )
+                    
+                }
             }
-        }
-        .onAppear{
-            Task{
-                try await quizService.fetchQuizzes()
-            }
+            .padding(.horizontal)
         }
     }
 }
