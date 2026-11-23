@@ -17,6 +17,7 @@
 	<string>527213311843-hdt0mvhcrqmrl800896d613tr2p7d5ou.apps.googleusercontent.com</string>
 	<key>UIAppFonts</key>
 	<array>
+		<string>DeliciousHandrawn-Regular.ttf</string>
 		<string>Nunito.ttf</string>
 		<string>Lato-Bold.ttf</string>
 		<string>Lato-Regular.ttf</string>

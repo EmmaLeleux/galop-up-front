@@ -16,4 +16,26 @@ enum LevelGalopUserEnum: String, CaseIterable, Codable {
     case GALOP6 = "Galop 6"
     case GALOP7 = "Galop 7"
     
+    var image : ImageResource {
+        switch self {
+        case .GALOP1:
+            return .galopinHeureux
+        case .GALOP2:
+            return .galopinHeureux
+        case .GALOP3:
+            return .galopinHeureux
+        case .GALOP4:
+            return .galopinHeureux
+        case .GALOP5:
+            return .galopinHeureux
+        case .GALOP6:
+            return .galopinHeureux
+        case .GALOP7:
+            return .galopinHeureux
+        }
+    }
+    
+    var numberGalop: Int {
+        Int(rawValue.split(separator: " ")[1]) ?? 0
+    }
 }

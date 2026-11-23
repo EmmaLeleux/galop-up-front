@@ -13,6 +13,7 @@ struct QuizSession: Codable, Identifiable {
     let niveauGalop: LevelGalopLessonQuizEnum?
     let createdAt: Date
     let chrono: Double?
+    let status: StatusQuizSessionEnum
     let nbQuestion: Int
     let nbGoodAnswer: Int
     let remainingSeconds: Double?

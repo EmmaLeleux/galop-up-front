@@ -14,6 +14,8 @@ struct Galop_UpApp: App {
     let postVM: PostViewModel
     let quizVM: QuizSessionViewModel
     let errorVM: ErrorViewModel
+    let eventVM: EventViewModel
+    let lessonVM: LessonViewModel
     
     init() {
         let tokenStore = TokenStore()
@@ -23,6 +25,8 @@ struct Galop_UpApp: App {
         pictureVM = PictureViewModel(apiClient: apiClient)
         postVM = PostViewModel(apiClient: apiClient)
         quizVM = QuizSessionViewModel(apiClient: apiClient)
+        eventVM = EventViewModel(apiClient: apiClient)
+        lessonVM = LessonViewModel(apiClient: apiClient)
     }
     
     var body: some Scene {
@@ -33,6 +37,8 @@ struct Galop_UpApp: App {
                 .environment(postVM)
                 .environment(quizVM)
                 .environment(errorVM)
+                .environment(eventVM)
+                .environment(lessonVM)
                 
         }
     }

@@ -1,0 +1,21 @@
+@font-face { font-family: 'Lato'; src: url('Lato-Regular.ttf'); font-weight: normal; }
+@font-face { font-family: 'Lato'; src: url('Lato-Bold.ttf'); font-weight: bold; }
+@font-face { font-family: 'Nunito'; src: url('Nunito-Bold.ttf'); font-weight: bold; }
+
+body {
+  font-family: 'Lato', -apple-system;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #4A3426;
+  margin: 0;
+  padding: 0 16px;
+  background: transparent;
+}
+
+h2 {
+  font-family: 'Nunito', -apple-system;
+  color: #8B5A3C;
+  font-size: 22px;
+}
+
+img { max-width: 100%; border-radius: 10px; }

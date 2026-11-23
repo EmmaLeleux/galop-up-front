@@ -14,13 +14,8 @@ struct DashboardQuizView: View {
         ZStack{
             Color.orangeBackground.ignoresSafeArea()
             VStack(spacing: 20){
-                HStack{
-                    Spacer()
-                    NavigationLink(destination: ProfilView(), label: {
-                        ProfilPictureComponentView(pictureUser: authVM.currentUser?.picture)
-                    })
-                    .padding(.trailing)
-                }
+                HeaderView(title: "Quiz", description: "Teste tes connaissances et prépare tes Galops en t'amusant !")
+
                 ForEach(TypeQuizEnum.allCases, id: \.self){ quiz in
                     
                     NavigationLink(

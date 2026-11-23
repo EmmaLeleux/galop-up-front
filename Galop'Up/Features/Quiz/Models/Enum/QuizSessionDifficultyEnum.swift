@@ -28,13 +28,13 @@ enum QuizSessionDifficultyEnum: String, Codable, CaseIterable{
     var description: String {
         switch self {
         case .CROISSANTE:
-            return "Tu démarres au galop 1, puis chaque progrès te fait grimper d’un niveau. Jusqu’où iras-tu ?"
+            return "Tu démarres au Galop 1, puis chaque progrès te fait grimper d'un niveau. Jusqu'où iras-tu ?"
         case .ALEATOIRE:
             return "Les questions de tous les niveaux se mélangent. À toi de t'adapter !"
         case .DEFINIE:
-            return "Tu choisis le galop que tu veux réviser, toutes les questions seront de ce niveau."
+            return "Tu choisis le Galop que tu veux réviser : toutes les questions seront de ce niveau."
         case .TUTO:
-            return "Tuto"
+            return "Découvre le fonctionnement de l'application pas à pas, sans pression."
         }
     }
 }

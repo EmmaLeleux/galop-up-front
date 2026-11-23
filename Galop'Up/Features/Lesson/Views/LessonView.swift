@@ -8,8 +8,37 @@
 import SwiftUI
 
 struct LessonView: View {
+    @Environment(LessonViewModel.self) var lessonVM
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack{
+            Color.orangeBackground.ignoresSafeArea()
+            
+            VStack{
+                HeaderView(title: "Leçons", description: "Des fiches claires pour réviser chaque Galop à ton rythme.")
+
+                
+                ScrollView{
+                    ForEach(lessonVM.lessons) { lesson in
+                        
+                        NavigationLink(destination: {
+                            OneLessonView(lesson: lesson)
+                        }, label: {
+                            OneLessonCardView(lesson: lesson)
+                                    
+                        })
+                        .padding(.horizontal)
+                        .padding(.vertical, 5)
+                    
+                    }
+                }
+            }
+            .onAppear {
+                Task{
+                    try await lessonVM.fetchLessons()
+                }
+            }
+        }
     }
 }
 

@@ -9,6 +9,6 @@ import Foundation
 
 struct QuizSessionStart: Codable {
     let session: QuizSession
-    let question: Question
+    let question: Question?
     
 }

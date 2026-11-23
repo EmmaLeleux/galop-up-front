@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OnBoardingLevelNotBeginnerView: View {
     var onComplete: () -> Void
+    var onCompleteChoiceLevel: () -> Void
     @Environment(AuthViewModel.self) var authVM
 
     var body: some View {
@@ -26,7 +27,7 @@ struct OnBoardingLevelNotBeginnerView: View {
             .CustomButton()
             
             Button("Passer et choisir mon niveau") {
-               
+               onCompleteChoiceLevel()
             }
             .foregroundStyle(.customBrown)
         }

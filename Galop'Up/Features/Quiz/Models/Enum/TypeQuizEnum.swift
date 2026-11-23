@@ -26,11 +26,11 @@ enum TypeQuizEnum: String, CaseIterable, Codable {
     var description: String {
         switch self {
         case .CLASSIQUE:
-            return "Obtient un maximum de bonne réponse sur une série de 20 questions. Pas de temps imparti."
+            return "Tu réponds à une série de 20 questions et tu essaies d'obtenir un maximum de bonnes réponses. Pas de temps imparti."
         case .CONTRE_LA_MONTRE:
-            return "Répond à un maximum de question dans le temps imparti !"
+            return "Tu as 60 secondes pour répondre à un maximum de questions !"
         case .SURVIE:
-            return "Démarre avec 3 vies et tente de survivre le plus longtemps possible sans erreur."
+            return "Tu démarres avec 3 vies : chaque erreur t'en fait perdre une. Tiens le plus longtemps possible !"
         }
     }
 }

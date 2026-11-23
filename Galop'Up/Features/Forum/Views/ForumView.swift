@@ -13,8 +13,13 @@ struct ForumView: View {
         
         ZStack{
             Color.orangeBackground.ignoresSafeArea()
-            PostListView()
             
+            VStack{
+                HeaderView(title: "Forum", description: "Partage ton expérience et entraide-toi avec la communauté.")
+
+                PostListView()
+                
+            }
             
             VStack{
                 Spacer()

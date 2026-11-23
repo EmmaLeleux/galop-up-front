@@ -34,7 +34,15 @@ struct OnBoardingView: View {
                     .padding(.horizontal)
                     .containerRelativeFrame([.horizontal])
                         
-                    case .notBeginner: OnBoardingLevelBeginnerView(onComplete: {Task{
+                    case .notBeginner: OnBoardingLevelNotBeginnerView(onComplete: {Task{
+                        authVM.fetchUser
+                    }
+                    }, onCompleteChoiceLevel: onBoardingVM.goToChoiceLevel
+                    )
+                    .padding(.horizontal)
+                    .containerRelativeFrame([.horizontal])
+                        
+                    case .choiceLevel: OnBoardingChoiceLevelView(onComplete: {Task{
                         authVM.fetchUser
                     }
                     })
@@ -51,8 +59,8 @@ struct OnBoardingView: View {
         .scrollIndicators(.hidden)
         .scrollDisabled(true)
         .onAppear {
-        
-                onBoardingVM.position.scrollTo(id: OnBoardingPageEnum.first.id)
+            
+            onBoardingVM.position.scrollTo(id: OnBoardingPageEnum.first.id)
             
             
             

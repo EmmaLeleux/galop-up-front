@@ -10,6 +10,7 @@ import SwiftUI
 struct QuizQuestionView: View {
     let question: Question
     @Binding var playQuizVM: PlayQuizViewModel
+    @Environment(QuizSessionViewModel.self) var quizVM
     
     var body: some View {
         VStack(spacing: 15){
@@ -17,6 +18,11 @@ struct QuizQuestionView: View {
                 .font(.custom("Nunito", size: 20))
                 .foregroundStyle(.customBrown)
                 .fontWeight(.bold)
+                .multilineTextAlignment(.leading)
+                .lineLimit(3)
+                .minimumScaleFactor(0.85)
+                .frame(maxWidth: .infinity)
+                .frame(height: 84)
             
             HStack{
                 Text(question.difficulty.rawValue)
@@ -38,19 +44,19 @@ struct QuizQuestionView: View {
             }
             
             if let picture = question.picture {
-                GeometryReader{ geo in
-                    AsyncImage(url: URL(string: picture.url)) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geo.size.width, height: geo.size.height)
-                            .clipShape(RoundedRectangle(cornerRadius: 15))
-                            .clipped()
-                    } placeholder: {
-                        ProgressView()
+                Color.clear
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 180)
+                    .overlay {
+                        AsyncImage(url: URL(string: picture.url)) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                        } placeholder: {
+                            ProgressView()
+                        }
                     }
-                    
-                }
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
                 
             }
             
@@ -59,8 +65,8 @@ struct QuizQuestionView: View {
                 Button(action:{
                     playQuizVM.selectedAnswer = answer
                 }, label: {
-                    AnswerView(answer: answer, isSelected: playQuizVM.selectedAnswer == answer)
-
+                    AnswerView(answer: answer, color: playQuizVM.fillAnswerColor(answer: answer, isCorrect: quizVM.isCorrect))
+                    
                 })
                 
             }

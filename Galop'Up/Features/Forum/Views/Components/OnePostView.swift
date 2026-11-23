@@ -58,7 +58,10 @@ struct OnePostView: View {
                             .foregroundStyle(.darkBrown)
                             .lineLimit(2)
                         
-                        Text(post.content)
+                        Text((try? AttributedString(
+                            markdown: post.content,
+                            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+                        )) ?? AttributedString(post.content))
                             .font(.custom("Lato-Regular", size: 14))
                             .foregroundStyle(.customGrey)
                             .lineLimit(onePostVM.contentLineLimit(post: post))

@@ -11,6 +11,7 @@ struct PostListView: View {
     @Environment(PostViewModel.self) var postVM
     var body: some View {
         
+        
         ScrollView{
             LazyVStack{
                 ForEach(postVM.posts) { post in

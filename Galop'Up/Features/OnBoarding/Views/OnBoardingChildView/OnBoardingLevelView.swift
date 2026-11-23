@@ -28,11 +28,6 @@ struct OnBoardingLevelView: View {
             
             Button("J’ai déjà des connaissances") {
                 onCompleteNotBeginner()
-                Task{
-                    
-                    
-                    try await authVM.logout()
-                }
             }
             .CustomButton()
         }

@@ -25,6 +25,7 @@ class OnBoardingViewModel {
     func goToPageLevel() { scrollToPage(.pageLevel) }
     func goToPageBeginnerLevel() { scrollToPage(.beginner)}
     func goToPageLevelNotBeginner() { scrollToPage(.notBeginner)}
+    func goToChoiceLevel() { scrollToPage(.choiceLevel)}
     
     
 }

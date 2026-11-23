@@ -13,6 +13,7 @@ struct CreatePostView: View {
     @Environment(PostViewModel.self) var postVM
     @Binding var isShowingSheet: Bool
     @State var createPostVM: CreatePostViewModel = CreatePostViewModel()
+    @State var isPosting: Bool = false
     var body: some View {
         ZStack{
             Color.orangeBackground
@@ -33,13 +34,23 @@ struct CreatePostView: View {
                     Spacer()
                     Button(action: {
                         Task{
-                            try await postVM.createPost(postInfo: CreatePostRequest(title: createPostVM.title, content: createPostVM.content, pictures: createPostVM.postPictureData))
-                            
-                            isShowingSheet = false
+                            defer { isPosting = false }
+                            if !isPosting{
+                                isPosting = true
+                                try await postVM.createPost(postInfo: CreatePostRequest(title: createPostVM.title, content: createPostVM.content, pictures: createPostVM.postPictureData))
+                                
+                                isPosting = false
+                                isShowingSheet = false}
                         }
                         
                     }, label: {
-                        Text("Poster")
+                        if isPosting{
+                            ProgressView().tint(.customWhite)
+                        }
+                        else{
+                            Text("Poster")
+
+                        }
                     })
                     .CustomButton(width: 100)
                 }

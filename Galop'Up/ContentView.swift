@@ -16,25 +16,31 @@ struct ContentView: View {
         ZStack{
             Color.orangeBackground
                 .ignoresSafeArea()
-        
+            
             if authVM.isCheckingSession {
-                        ProgressView() //TODO: mettre le splash screen à la place
-                    }
+                SplashScreenView()                    }
             
             else if authVM.isAuthenticated {
-
+                
                 if authVM.currentUser?.level == nil{
                     OnBoardingView()
                 }
-               
-            
+                
+                
                 else{
-                        if let session = quizVM.activeSession {
+                    
+                    if let session = quizVM.activeSession, session.status != .ABANDONE {
+                        if session.status == .EN_COURS{
                             QuizGameView()
-                                    .transition(.move(edge: .bottom))
-                                    .zIndex(1)
-                            }
+                                .transition(.move(edge: .bottom))
+                                .zIndex(1)
+                        }
+                        else if session.status == .TERMINE{
+                            ResultQuizView()
+                        }
                         
+                    }
+                    
                     else{
                         NavigationStack{
                             TabView{
@@ -78,20 +84,20 @@ struct ContentView: View {
                     }
                 }
                 
-            ErrorMessageComponentView()
-
+                ErrorMessageComponentView()
+                
             }
             else{
                 authentificationView()
             }
         }
         .onChange(of: scenePhase) { _, newPhase in
-                    if newPhase == .active {
-                        Task {
-                            try? await authVM.fetchUser()
-                        }
-                    }
+            if newPhase == .active {
+                Task {
+                    try? await authVM.fetchUser()
                 }
+            }
+        }
         
         
     }

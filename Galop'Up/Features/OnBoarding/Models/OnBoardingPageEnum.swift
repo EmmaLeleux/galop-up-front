@@ -11,6 +11,7 @@ enum OnBoardingPageEnum: String, Identifiable, CaseIterable {
     case pageLevel
     case beginner
     case notBeginner
+    case choiceLevel
     
 
     var id: String { rawValue }

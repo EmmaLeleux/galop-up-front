@@ -36,7 +36,10 @@ struct ErrorResponse: Codable, Equatable {
             "NO_QUESTION_AVAILABLE": "Aucune question n'a été trouvée.",
             "SESSION_NOT_FOUND": "Vous n'avez pas de quiz en cours",
             "ANSWER_NOT_FOUND": "La réponse que vous avez renseignée n'existe pas",
-            "LIMIT_QUIZ_REACHED": "Vous avez atteint le nombre maximum de question pour ce quiz."
+            "LIMIT_QUIZ_REACHED": "Vous avez atteint le nombre maximum de question pour ce quiz.",
+            "QUIZ_ALREADY_FINISHED": "Le quiz auquel vous essayez de répondre est terminé ou abandonné.",
+            "QUIZ_NOT_CONCERNED": "Il n'est possible d'utiliser cette action qu'avec les quiz contre la montre.",
+            "TIMING_NOT_REACHED": "Il reste du temps avant la fin du quiz"
             
         ]
         

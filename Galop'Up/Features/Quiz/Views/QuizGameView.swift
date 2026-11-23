@@ -15,34 +15,38 @@ struct QuizGameView: View {
         ZStack{
             Color.orangeBackground.ignoresSafeArea()
             
+            
+            
             VStack(spacing: 20){
                 
-                GeometryReader{geo in
-                    ZStack{
-                        HStack{
-                            RoundedRectangle(cornerRadius: 20).fill(.orangeButton)
-                                .frame(width: geo.size.width * playQuizVM.getProgressQuizClassique(nbQuestions: quizVM.activeSession?.nbQuestion ?? 0), height: 5)
-                            Spacer()
-                        }
-                        RoundedRectangle(cornerRadius: 20).fill(.orangeButton.opacity(0.1))
-                            .frame(width: geo.size.width, height: 5)
-                        
-                        
-                    }
-                }
-                .frame(height: 5)
+                ProgressQuizView( playQuizVM: $playQuizVM)
+                
                 
                 Spacer()
                 if let question = quizVM.currentQuestion{
                     QuizQuestionView(question: question, playQuizVM: $playQuizVM)
+                        .id(question.id)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
                 }
                 
                 Spacer()
                 
                 Button(action: {
                     if let answer = playQuizVM.selectedAnswer{
-                        Task{
-                            try await quizVM.updateQuizSession(answer: answer)
+                        Task {
+                            let updateSession: QuizSessionStart = try await quizVM.updateQuizSession(answer: answer)
+                            playQuizVM.isRevealing = true
+                            try? await Task.sleep(for: .seconds(1))
+                            
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                quizVM.changeQuestion(quizSession: updateSession)
+                            }
+                            playQuizVM.isRevealing = false
+                            playQuizVM.selectedAnswer = nil
+                            
                         }
                     }
                 }, label: {
@@ -56,6 +60,12 @@ struct QuizGameView: View {
                 
             }
             .padding()
+            
+            if playQuizVM.openPopup{
+                VStack{
+                    StopQuizPopUp(playQuizVM: $playQuizVM)
+                }
+            }
         }
     }
 }
